@@ -1,0 +1,1642 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============================================
+% Preamble Setup and Packages (Finalized)
+% ============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{authblk}
+
+% --- Color Definitions (Simplified for code/links) ---
+\definecolor{myblue}{RGB}{0, 102, 204}
+\definecolor{codegray}{rgb}{0.9,0.9,0.9}
+\definecolor{codebackground}{rgb}{0.98, 0.98, 0.98}
+
+% --- Hyperref Setup ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=myblue,
+    filecolor=myblue,
+    urlcolor=myblue,
+    citecolor=myblue,
+    pdfborder={0 0 0}
+}
+
+% --- Header and Footer (Professional) ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textbf{Obesity and Cardiovascular Risk Study}}
+\fancyhead[R]{\small MT2025108\_MT2025133}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.0pt}
+
+% --- Code Listing Style ---
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{codebackground},
+    rulecolor=\color{lightgray},
+    language=Python,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{myblue}\bfseries,
+    stringstyle=\color[RGB]{204, 51, 0},
+    tabsize=4,
+    columns=fixed
+}
+
+% --- Section Spacing (Customized for readability) ---
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
+                                   {2.3ex \@plus .2ex}%
+                                   {\normalfont\Large\bfseries\vspace{0.5\baselineskip}}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+                                   {-3.25ex \@plus -1ex \@minus -.2ex}%
+                                   {1.5ex \@plus .2ex}%
+                                   {\normalfont\large\bfseries\vspace{0.3\baselineskip}}}
+\makeatother
+
+\date{}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    
+    % Logo (uncomment and add your logo)
+    % \includegraphics[width=0.3\textwidth]{university_logo.png}\\[1cm]
+    
+    % University Name
+    % University Name
+    {\LARGE \textbf{International Institute of Information}}\\[0.2cm]
+    {\LARGE \textbf{Technology, Bangalore}}\\[0.5cm]
+    {\large Computer Science and Engineering}\\[2cm]
+    
+    % Horizontal line
+    \rule{\textwidth}{1.5pt}\\[0.4cm]
+    
+    % Report Title
+    {\huge \textbf{Obesity and Cardiovascular Risk Study}}\\[0.2cm]
+    {\Large \textbf{Machine Learning Models for Healthcare Risk Prediction}}
+    
+    % Horizontal line
+    \rule{\textwidth}{1.5pt}\\[1.5cm]
+    
+    % Course Information
+    {\large \textbf{Course Name: Machine Learning}}\\[0.3cm]
+    {\large Course Code: AIT 511}\\[2cm]
+    
+    % Author Information
+    \begin{minipage}{0.4\textwidth}
+        \begin{flushleft}
+            \large
+            \textbf{Submitted By:}\\
+            Ruturaj Dnyandeo Wairkar\\
+            Roll No: MT2025108\\[0.3cm]
+            Vivek Joshi\\
+            Roll No: MT2025133
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.4\textwidth}
+        \begin{flushright}
+            \large
+            \textbf{Submitted To:}\\
+            Prof Aswin Kannan\\[0.3cm]
+            \textbf{Kaggle Team:}\\
+            MT2025108\_MT2025133
+        \end{flushright}
+    \end{minipage}\\[3cm]
+    
+    \vfill
+    
+    % GitHub Link
+    {\large \textbf{GitHub Repository:}}\\
+    {\large \url{https://github.com/vivekvj18/ML_PROJECT}\\[1cm]
+    
+\end{titlepage}
+\newpage
+
+% ============================================
+% Table of Contents and Lists (FINALIZED ORDER)
+% ============================================
+\tableofcontents
+\newpage
+
+\listoffigures
+\newpage
+
+\listoftables
+\newpage
+
+\section*{List of Algorithms}
+\addcontentsline{toc}{section}{List of Algorithms}
+\begin{enumerate}
+    \item Outlier Capping using IQR Method
+    \item Optuna Hyperparameter Optimization
+\end{enumerate}
+\newpage
+
+% ============================================
+% ABSTRACT
+% ============================================
+\begin{abstract}
+This report details a comprehensive machine learning approach for the multi-class classification of \textbf{Obesity and Cardiovascular Disease (CVD) risk} into seven distinct, ordinal weight categories. The primary goal was to develop a stable model achieving high generalization accuracy on a synthetic, moderately imbalanced dataset. Our robust preprocessing pipeline included mandatory steps like \textbf{IQR-based outlier capping} and extensive feature engineering, leading to the creation of the \textbf{Body Mass Index (BMI)} feature, which empirical analysis later confirmed to be the single most influential predictor.
+
+\vspace{0.5\baselineskip}
+
+We rigorously implemented and compared three sequential ensemble models: Decision Tree (as the performance baseline), Random Forest (a bagging ensemble), and \textbf{XGBoost} (a regularized gradient boosting framework). To maximize the models' predictive power, we employed sophisticated hyperparameter tuning strategies, including \textbf{RandomizedSearchCV} for the Random Forest model and \textbf{Bayesian Optimization with the TPE sampler (Optuna)} for the XGBoost classifier.
+
+\vspace{0.5\baselineskip}
+
+The final XGBoost model, optimized across \textbf{218 trials} and trained using sample weighting to mitigate class imbalance effects, achieved a peak 5-fold cross-validation accuracy of \textbf{91.77\%}. The analysis confirmed two key observations: \textbf{(1)} XGBoost delivered superior stability and performance gains due to its inherent regularization (L1/L2), and \textbf{(2)} model confusion was highly concentrated between adjacent weight categories, validating the use of advanced gradient boosting techniques for high-accuracy, health-related risk classification.
+\end{abstract}
+
+\newpage
+
+% ============================================
+% 1. INTRODUCTION
+% ============================================
+\section{Introduction}
+
+\subsection{Problem Statement}
+Obesity and cardiovascular disease (CVD) are major global health concerns. Early identification of risk categories can enable timely interventions. This project aims to develop a robust machine learning model to classify individuals into seven weight categories based on eating habits, physical condition, and lifestyle factors.
+
+\subsection{Dataset Description}
+The competition dataset was synthetically generated from a deep learning model trained on the original ``Obesity or CVD risk dataset''. The dataset characteristics are:
+
+\begin{itemize}
+    \item \textbf{Training set:} 15,533 samples with 18 features
+    \item \textbf{Test set:} 5,225 samples with 17 features (excluding target)
+    \item \textbf{Target variable:} WeightCategory (7 classes)
+    \item \textbf{No missing values} in either dataset
+\end{itemize}
+
+\subsection{Target Classes}
+The target variable consists of seven ordinal categories representing different weight levels:
+\begin{enumerate}
+    \item Insufficient\_Weight (12.04\%)
+    \item Normal\_Weight (15.10\%)
+    \item Overweight\_Level\_I (11.87\%)
+    \item Overweight\_Level\_II (12.11\%)
+    \item Obesity\_Type\_I (14.21\%)
+    \item Obesity\_Type\_II (15.47\%)
+    \item Obesity\_Type\_III (19.20\%)
+\end{enumerate}
+
+The class distribution shows moderate imbalance with Obesity Type III being the most prevalent category.
+
+\newpage
+
+% ============================================
+% 2. EXPLORATORY DATA ANALYSIS (REDESIGNED)
+% ============================================
+\section{Exploratory Data Analysis}
+
+Exploratory Data Analysis (EDA) is a critical step in understanding the dataset's structure, identifying patterns, and informing preprocessing decisions. This section systematically examines the dataset through statistical summaries, distribution analysis, correlation studies, and visualizations to guide our modeling strategy.
+
+\subsection{Dataset Overview and Initial Inspection}
+
+\subsubsection{Dataset Dimensions and Structure}
+The competition dataset consists of:
+\begin{itemize}
+    \item \textbf{Training set:} 15,533 samples with 18 features (17 predictors + 1 target)
+    \item \textbf{Test set:} 5,225 samples with 17 features (target excluded)
+    \item \textbf{Data completeness:} No missing values detected in either dataset
+    \item \textbf{Data types:} Mix of numerical (8 features) and categorical (9 features including target)
+\end{itemize}
+
+\subsubsection{Feature Type Classification}
+Features were systematically categorized to guide preprocessing strategies:
+
+\paragraph{Numerical Features (8 total):}
+\begin{itemize}
+    \item \textbf{Age:} Age in years, range [14.0, 35.0]
+    \item \textbf{Height:} Height in meters, range [1.45, 1.96]
+    \item \textbf{Weight:} Weight in kilograms, range [39.0, 165.06]
+    \item \textbf{FCVC:} Frequency of vegetable consumption, scale [1.0, 3.0]
+    \item \textbf{NCP:} Number of main meals per day, typically [1.0, 4.0]
+    \item \textbf{CH2O:} Daily water consumption in liters, scale [1.0, 3.0]
+    \item \textbf{FAF:} Physical activity frequency (days per week), range [0.0, 3.0]
+    \item \textbf{TUE:} Time using technology devices (hours per day), range [0.0, 2.0]
+\end{itemize}
+
+\paragraph{Categorical Features (8 predictors):}
+\begin{itemize}
+    \item \textbf{Gender:} Binary - Male (50.11\%), Female (49.89\%)
+    \item \textbf{family\_history\_with\_overweight:} Binary - yes (81.74\%), no (18.26\%)
+    \item \textbf{FAVC:} Frequent consumption of high caloric food - yes (91.32\%), no (8.68\%)
+    \item \textbf{CAEC:} Food consumption between meals - Sometimes (84.50\%), Frequently, Always, no
+    \item \textbf{SMOKE:} Smoking habit - no (98.86\%), yes (1.14\%)
+    \item \textbf{SCC:} Calories consumption monitoring - no (96.69\%), yes (3.31\%)
+    \item \textbf{CALC:} Alcohol consumption frequency - Sometimes (72.65\%), Frequently, no, Always
+    \item \textbf{MTRANS:} Transportation method - Public\_Transportation (80.28\%), Automobile, Walking, Motorbike, Bike
+\end{itemize}
+
+\subsection{Target Variable Analysis}
+
+The target variable \texttt{WeightCategory} represents an ordinal classification problem with seven distinct levels representing increasing obesity risk. Understanding its distribution is crucial for addressing class imbalance and selecting appropriate evaluation metrics.
+
+\paragraph{Class Distribution:}
+\begin{itemize}
+    \item Insufficient\_Weight: 1,871 samples (12.04\%)
+    \item Normal\_Weight: 2,346 samples (15.10\%)
+    \item Overweight\_Level\_I: 1,844 samples (11.87\%)
+    \item Overweight\_Level\_II: 1,881 samples (12.11\%)
+    \item Obesity\_Type\_I: 2,207 samples (14.21\%)
+    \item Obesity\_Type\_II: 2,403 samples (15.47\%)
+    \item Obesity\_Type\_III: 2,981 samples (19.20\%)
+\end{itemize}
+
+\textbf{Imbalance Analysis:} The dataset exhibits moderate class imbalance with Obesity Type III being 1.62× more prevalent than Overweight Level I. This imbalance necessitates stratified sampling and sample weighting strategies during model training.
+
+\subsection{Descriptive Statistics for Numerical Features}
+
+Statistical summary of numerical features revealed important characteristics:
+
+\begin{itemize}
+    \item \textbf{Age:} Mean = 24.31 years (std = 6.35), suggesting a young adult population
+    \item \textbf{Height:} Mean = 1.70m (std = 0.09), normal distribution expected
+    \item \textbf{Weight:} Mean = 86.59kg (std = 26.19), high variance indicating diverse body types
+    \item \textbf{FCVC:} Mean = 2.42 (std = 0.53), most consume vegetables regularly
+    \item \textbf{FAF:} Mean = 1.01 (std = 0.85), low physical activity on average
+    \item \textbf{CH2O:} Mean = 2.01 (std = 0.61), adequate water consumption
+\end{itemize}
+
+These statistics confirm the need for outlier detection and feature scaling in preprocessing.
+
+\subsection{Visual Analysis of Categorical Features}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{categorical_columns.png}
+    \caption{Consolidated Distribution of Categorical Features}
+    \label{fig:categorical_dist}
+\end{figure}
+
+\noindent\textbf{Key Observations:} The grid layout displays count plots for all eight categorical predictors and the target WeightCategory. Notable patterns include: (1) Nearly balanced gender distribution (50:50), (2) Family history shows strong prevalence (81.74\% yes), (3) High caloric food consumption is widespread (91.32\% yes), (4) Most participants don't monitor calories (96.69\% no) or smoke (98.86\% no), (5) Public transportation dominates (80.28\%), (6) Target shows moderate imbalance with Obesity Type III most prevalent (19.20\%).
+
+\paragraph{Critical Insights from Categorical Analysis:}
+\begin{enumerate}
+    \item \textbf{Family History Dominance:} 81.74\% prevalence suggests this feature will have high predictive power
+    \item \textbf{Lifestyle Patterns:} High caloric food consumption (91.32\%) combined with low calorie monitoring (3.31\%) indicates behavioral risk factors
+    \item \textbf{Smoking Insignificance:} With 98.86\% non-smokers, this feature may have limited discriminative power
+    \item \textbf{Balanced Gender:} 50:50 split ensures no gender bias in model training
+\end{enumerate}
+
+\subsection{Correlation Analysis and Numerical Relationships}
+
+To understand linear relationships among numerical features and identify multicollinearity, we performed comprehensive correlation analysis.
+
+\subsubsection{Pairwise Feature Correlations}
+
+Figure \ref{fig:pairplot_num} displays the pairwise relationships between all numerical features, colored by the target weight category. This visualization serves dual purposes: identifying correlated features and assessing class separability in feature space.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{pairplot.png}
+    \caption{Pairplot Matrix of Numerical Features Colored by Weight Category.}
+    \label{fig:pairplot_num}
+\end{figure}
+
+\noindent\textbf{Key Observations:} The diagonal shows kernel density estimates for each feature's distribution across target classes. Off-diagonal scatter plots reveal pairwise relationships. Notable patterns: (1) Weight and Height show progressive separation across categories from blue (Insufficient Weight) to red (Obesity Type III), (2) Most feature pairs exhibit substantial overlap, confirming non-linear separability challenges, (3) Age distribution is relatively uniform across classes, (4) Lifestyle features (FCVC, FAF, CH2O) show weak linear relationships with other features, (5) NCP (number of meals) appears nearly constant across the dataset.
+
+
+\paragraph{Key Correlation Findings:}
+\begin{itemize}
+    \item \textbf{Weight-Height Relationship:} Moderate positive correlation, motivating BMI feature engineering
+    \item \textbf{Low Multicollinearity:} No feature pairs exhibit correlation > 0.7, suggesting all features provide unique information
+    \item \textbf{Target Relationship:} Weight shows strongest visual correlation with target, followed by Height
+    \item \textbf{Lifestyle Independence:} FCVC, FAF, and CH2O show low inter-correlation, indicating independent lifestyle dimensions
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Target-Feature Relationships}
+
+Understanding how the target variable relates to each categorical predictor guides feature selection and importance interpretation.
+
+\subsubsection{Categorical Features vs Weight Category}
+
+
+Figure \ref{fig:categorical_dist} presents stacked count plots showing the conditional distribution of weight categories within each level of categorical features. This analysis reveals which categorical features exhibit strong discriminative patterns.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=11cm]{Categorical_Features_vs_Target.png}
+    \caption{Distribution of Weight Categories Across Categorical Features}
+    \label{fig:categorical_dist}
+\end{figure}
+
+
+\noindent\textbf{Key Observations:} Each subplot shows a stacked bar chart with weight categories color-coded. The relative heights indicate conditional probabilities $P(\text{WeightCategory} | \text{Feature})$. Strong discriminative patterns observed in: (1) \textbf{family\_history\_with\_overweight}: "Yes" group shows significantly higher Obesity Type III prevalence compared to "No" group, (2) \textbf{FAVC}: Frequent high-caloric food consumption strongly associates with obesity categories, (3) \textbf{MTRANS}: Automobile users show higher obesity prevalence than public transport or active transport users, (4) \textbf{Gender}: Relatively balanced distribution suggests gender-agnostic obesity patterns in this dataset.
+
+
+\paragraph{Predictive Value Assessment:}
+\begin{enumerate}
+    \item \textbf{High Predictive Power:} family\_history\_with\_overweight, FAVC, MTRANS show clear conditional probability shifts
+    \item \textbf{Moderate Predictive Power:} CAEC (eating between meals), CALC (alcohol consumption) show mild patterns
+    \item \textbf{Low Predictive Power:} SMOKE (due to extreme imbalance), SCC (calorie monitoring) show minimal discrimination
+    \item \textbf{Neutral:} Gender shows balanced distribution, no inherent bias
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsubsection{Numerical Features Distribution by Weight Category}
+
+Figure \ref{fig:numerical_boxplots_target} provides box-and-whisker plots for each numerical feature stratified by weight category. This visualization reveals distribution characteristics, central tendencies, spreads, and outliers within each class.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth,height=10cm]{Numerical_Features_vs_Target.png}
+    \caption{Boxplot Analysis of Numerical Features Across Weight Categories.}
+    \label{fig:numerical_boxplots_target}
+\end{figure}
+
+
+
+
+\noindent\textbf{Key Observations:} Each subplot displays median (center line), interquartile range (box), whiskers (1.5×IQR), and outliers (points). Critical observations: (1) \textbf{Weight}: Clear monotonic increase from Insufficient Weight (mean ≈ 55kg) to Obesity Type III (mean ≈ 120kg), strongest predictor, (2) \textbf{Height}: Progressive increase across categories, though with substantial overlap, (3) \textbf{Age}: Relatively stable distributions with slightly higher medians for obesity categories, (4) \textbf{FCVC}: Inverse relationship—lower obesity categories show higher vegetable consumption, (5) \textbf{FAF}: Strong inverse correlation—higher physical activity in lower weight categories, (6) \textbf{CH2O}: Mild inverse pattern with water consumption, (7) \textbf{NCP, TUE}: Minimal discriminative patterns, (8) Outliers present in Age, Height, and Weight justify IQR-based capping strategy.
+
+
+
+
+\paragraph{Feature Importance Expectations:}
+Based on boxplot separation and overlap analysis:
+\begin{itemize}
+    \item \textbf{Primary Predictors:} Weight, Height (and derived BMI)
+    \item \textbf{Secondary Predictors:} FAF (physical activity), FCVC (vegetable consumption)
+    \item \textbf{Tertiary Predictors:} Age, CH2O (water intake)
+    \item \textbf{Weak Predictors:} NCP (meals), TUE (technology use)
+\end{itemize}
+
+\subsection{Outlier Detection and Treatment Strategy}
+
+Outlier analysis revealed extreme values in anthropometric measurements (Age, Height, Weight) that could negatively impact model performance. Rather than removing these samples (which would reduce training data), we adopted an IQR-based capping strategy:
+
+\begin{itemize}
+    \item \textbf{Method:} Interquartile Range (IQR) with 1.5× multiplier
+    \item \textbf{Features treated:} Age, Height, Weight, FCVC, NCP, CH2O, FAF, TUE
+    \item \textbf{Rationale:} Preserves sample size while mitigating extreme value influence
+    \item \textbf{Result:} Post-capping ranges: Age [14.0, 35.0], Height [1.45, 1.96], Weight [39.0, 165.06]
+\end{itemize}
+
+\subsection{Summary of EDA Findings}
+
+The comprehensive exploratory analysis yielded critical insights that directly shaped our modeling approach:
+
+\begin{enumerate}
+    \item \textbf{Feature Engineering Motivation:} 
+    \begin{itemize}
+        \item Strong Weight-Height relationship → BMI feature creation
+        \item Age distribution patterns → Age binning strategy
+    \end{itemize}
+    \newpage
+    
+    \item \textbf{Preprocessing Requirements:}
+    \begin{itemize}
+        \item Outlier capping for numerical features using IQR method
+        \item One-hot encoding for categorical features to handle non-ordinal categories
+        \item Standardization (z-score) for numerical features due to different scales
+    \end{itemize}
+    
+    \item \textbf{Class Imbalance Handling:}
+    \begin{itemize}
+        \item Stratified train-validation split to maintain class proportions
+        \item Sample weighting in XGBoost to address 1.62× imbalance ratio
+    \end{itemize}
+    
+    \item \textbf{Model Selection Guidance:}
+    \begin{itemize}
+        \item Non-linear decision boundaries needed (overlap in feature space)
+        \item Tree-based ensembles preferred over linear models
+        \item Feature importance analysis will validate EDA-predicted rankings
+    \end{itemize}
+    
+    \item \textbf{Expected Challenges:}
+    \begin{itemize}
+        \item Adjacent weight category confusion (Overweight I vs Normal, Overweight I vs Overweight II)
+        \item Low discriminative power of some features (SMOKE, SCC, NCP, TUE)
+        \item Ordinal nature requires careful evaluation metrics (accuracy may hide adjacent class errors)
+    \end{itemize}
+\end{enumerate}
+
+These insights established the foundation for our preprocessing pipeline and model architecture decisions, ensuring data-driven rather than assumption-based approach to obesity risk classification.
+
+\newpage
+% ============================================
+% 3. DATA PREPROCESSING
+% ============================================
+\section{Data Preprocessing}
+
+\subsection{Missing Value Treatment}
+\textbf{Finding:} No missing values were detected in the dataset.
+
+\subsection{Outlier Handling}
+Applied IQR-based capping to handle extreme values:
+
+\begin{algorithm}[H]
+\caption{Outlier Capping using IQR Method}
+\begin{algorithmic}[1]
+\For{each numerical feature $f$}
+    \State $Q1 \gets$ 25th percentile of $f$
+    \State $Q3 \gets$ 75th percentile of $f$
+    \State $IQR \gets Q3 - Q1$
+    \State $lower\_bound \gets Q1 - 1.5 \times IQR$
+    \State $upper\_bound \gets Q3 + 1.5 \times IQR$
+    \State Cap values: $f[f < lower\_bound] \gets lower\_bound$
+    \State Cap values: $f[f > upper\_bound] \gets upper\_bound$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Feature Engineering}
+
+\subsubsection{For Random Forest Model}
+Created two additional features to capture domain knowledge:
+
+\begin{enumerate}
+    \item \textbf{Body Mass Index (BMI):}
+    \begin{equation}
+        BMI = \frac{Weight}{Height^2}
+    \end{equation}
+
+    \item \textbf{Age Groups:} Binned age into meaningful categories
+    \begin{itemize}
+        \item Teen: [0, 18)
+        \item Young: [18, 30)
+        \item Adult: [30, 45)
+        \item MidAge: [45, 60)
+        \item Senior: [60, 100]
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Categorical Encoding}
+Applied One-Hot Encoding with \texttt{drop\_first=True} to avoid multicollinearity:
+\begin{itemize}
+    \item 8 categorical features expanded to 15 binary features
+    \item Ensured consistent encoding between train and test sets
+    \item Used \texttt{align()} method to match column structure
+\end{itemize}
+
+\subsection{Feature Scaling}
+Applied StandardScaler (z-score normalization) to numerical features:
+
+\begin{equation}
+    x_{scaled} = \frac{x - \mu}{\sigma}
+\end{equation}
+
+where $\mu$ is the mean and $\sigma$ is the standard deviation.
+
+\textbf{Features scaled:} Age, Height, Weight, FCVC, NCP, CH2O, FAF, TUE, BMI (for RF)
+
+\subsection{Train-Validation Split}
+\begin{itemize}
+    \item Split ratio: 80\% training, 20\% validation
+    \item Stratified split to maintain class distribution
+    \item Random state: 42 (for reproducibility)
+    \item Final dimensions:
+    \begin{itemize}
+        \item X\_train: (12,426, 23)
+        \item X\_val: (3,107, 23)
+    \end{itemize}
+\end{itemize}
+
+\newpage
+
+% ============================================
+% 4. METHODOLOGY
+% ============================================
+\section{Methodology}
+
+We implemented and compared three tree-based ensemble algorithms, progressively increasing in complexity and performance.
+
+\subsection{Decision Tree Classifier}
+
+\subsubsection{Model Description}
+Decision Trees create a flowchart-like structure by recursively splitting the feature space based on feature values that maximize information gain or minimize impurity.
+
+\subsubsection{Implementation Details}
+\begin{lstlisting}[language=Python]
+from sklearn.tree import DecisionTreeClassifier
+
+dt_model = DecisionTreeClassifier(
+    max_depth=9,
+    random_state=42
+)
+dt_model.fit(X_train, y_train)
+\end{lstlisting}
+
+\subsubsection{Hyperparameters}
+\begin{itemize}
+    \item \textbf{max\_depth:} 9 (limits tree depth to prevent overfitting)
+    \item \textbf{criterion:} gini (default)
+    \item \textbf{random\_state:} 42
+\end{itemize}
+
+\subsubsection{Rationale}
+Decision Trees serve as a baseline model due to:
+\begin{itemize}
+    \item High interpretability
+    \item No feature scaling required
+    \item Handles non-linear relationships naturally
+    \item Fast training and prediction
+\end{itemize}
+
+\subsection{Random Forest Classifier}
+
+\subsubsection{Model Description}
+Random Forest is an ensemble method that constructs multiple decision trees during training and outputs the mode of classes for classification. It reduces overfitting through:
+\begin{itemize}
+    \item Bootstrap aggregating (bagging)
+    \item Random feature subset selection at each split
+    \item Averaging predictions across trees
+\end{itemize}
+
+\subsubsection{Implementation Details}
+\begin{lstlisting}[language=Python]
+from sklearn.ensemble import RandomForestClassifier
+
+rf_model = RandomForestClassifier(
+    n_estimators=221,
+    max_depth=30,
+    min_samples_split=8,
+    min_samples_leaf=1,
+    max_features='sqrt',
+    random_state=42,
+    n_jobs=-1
+)
+rf_model.fit(X_train, y_train)
+\end{lstlisting}
+
+\subsubsection{Hyperparameter Tuning}
+Used RandomizedSearchCV with 3-fold cross-validation:
+
+\begin{table}[H]
+\centering
+\caption{Random Forest Hyperparameter Search Space}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Search Range} \\
+\midrule
+n\_estimators & [100, 250] \\
+max\_depth & [None, 10, 20, 30] \\
+min\_samples\_split & [2, 10] \\
+min\_samples\_leaf & [1, 5] \\
+max\_features & ['sqrt', 'log2'] \\
+\midrule
+\multicolumn{2}{c}{\textbf{Tuning Strategy}} \\
+\midrule
+\textbf{Search Method} & RandomizedSearchCV \\
+\textbf{Iterations} & 15 \\
+\textbf{CV Folds} & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Best Hyperparameters Found}
+\begin{itemize}
+    \item n\_estimators: 221
+    \item max\_depth: 30
+    \item max\_features: 'sqrt'
+    \item min\_samples\_split: 8
+    \item min\_samples\_leaf: 1
+\end{itemize}
+
+\subsubsection{Feature Importance}
+Top 5 most important features:
+\begin{enumerate}
+    \item BMI: 34.52\%
+    \item Weight: 25.72\%
+    \item FCVC: 6.65\%
+    \item Age: 6.38\%
+    \item Height: 5.47\%
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig_feature_importance.png}
+    \caption{Random Forest Feature Importance ranking. BMI and Weight are overwhelmingly the most influential features, aligning with domain knowledge of obesity risk factors.}
+    \label{fig:rf_feature_imp}
+\end{figure}
+
+\subsection{XGBoost Classifier}
+
+\subsubsection{Model Description}
+XGBoost (Extreme Gradient Boosting) is an advanced gradient boosting framework that builds an ensemble of weak learners sequentially, where each new tree corrects errors made by previous trees. Key advantages:
+\begin{itemize}
+    \item Regularization (L1 and L2) prevents overfitting
+    \item Handles missing values internally
+    \item Parallel processing for faster training
+    \item Built-in cross-validation
+\end{itemize}
+
+\subsubsection{Data Preparation Strategy}
+For XGBoost, we employed an advanced data strategy:
+\begin{enumerate}
+    \item Combined training data with original dataset (17,644 samples)
+    \item Removed duplicates (final: 17,620 samples)
+    \item Holistic preprocessing: scaled all numerical features and encoded categoricals together
+    \item Used sample weights based on class distribution to handle imbalance
+\end{enumerate}
+
+\subsubsection{Implementation Details}
+\begin{lstlisting}[language=Python]
+from xgboost import XGBClassifier
+from sklearn.utils.class_weight import compute_class_weight
+
+xgb_model = XGBClassifier(
+    objective='multi:softprob',
+    num_class=7,
+    n_estimators=900,
+    learning_rate=0.024043,
+    max_depth=10,
+    min_child_weight=3,
+    subsample=0.7,
+    colsample_bytree=0.4,
+    gamma=0.7,
+    reg_alpha=0.014541,
+    reg_lambda=1.30014,
+    random_state=42
+)
+
+# Compute sample weights for class imbalance
+class_weights = compute_class_weight(
+    'balanced',
+    classes=np.unique(y_train),
+    y=y_train
+)
+sample_weights = [class_weights[y] for y in y_train]
+
+xgb_model.fit(X_train, y_train,
+              sample_weight=sample_weights)
+\end{lstlisting}
+
+\subsubsection{Hyperparameter Optimization using Optuna}
+Employed Optuna for Bayesian optimization with Tree-structured Parzen Estimator (TPE):
+
+\begin{table}[H]
+\centering
+\caption{XGBoost Hyperparameter Search Space (Optuna)}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Search Range} \\
+\midrule
+n\_estimators & [500, 2000] step 100 \\
+learning\_rate & [0.01, 0.05] log scale \\
+max\_depth & [5, 12] \\
+min\_child\_weight & [1, 7] \\
+subsample & [0.5, 0.9] step 0.05 \\
+colsample\_bytree & [0.4, 0.9] step 0.05 \\
+gamma & [0.0, 3.0] step 0.1 \\
+reg\_alpha & [0.01, 5.0] log scale \\
+reg\_lambda & [0.01, 5.0] log scale \\
+\midrule
+\multicolumn{2}{c}{\textbf{Optimization Strategy}} \\
+\midrule
+\textbf{Optimization Method} & Optuna TPE Sampler \\
+\textbf{Trials} & 218 (out of 300 max) \\
+\textbf{CV Strategy} & 5-fold StratifiedKFold \\
+\textbf{Timeout} & 5 hours \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Best Hyperparameters (Trial 104)}
+\begin{itemize}
+    \item n\_estimators: 900
+    \item learning\_rate: 0.024043
+    \item max\_depth: 10
+    \item min\_child\_weight: 3
+    \item subsample: 0.7
+    \item colsample\_bytree: 0.4
+    \item gamma: 0.7
+    \item reg\_alpha: 0.014541
+    \item reg\_lambda: 1.30014
+\end{itemize}
+
+\newpage
+
+% ============================================
+% 5. RESULTS AND DISCUSSION
+% ============================================
+\section{Results and Discussion}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{fig_overall_accuracy.png}
+    \caption{Overall Model Accuracy Comparison on the Validation Set. XGBoost shows the best performance, validating the use of boosting algorithms for this task.}
+    \label{fig:overall_accuracy}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{fig_comprehensive_metrics.png}
+    \caption{Comprehensive Comparison of Validation Metrics (Accuracy, Precision, Recall, F1-Score) across all three models. Random Forest and XGBoost offer balanced and superior performance across all metrics.}
+    \label{fig:comprehensive_metrics}
+\end{figure}
+
+\subsection{Performance Metrics}
+
+\subsubsection{Decision Tree Performance}
+
+\begin{table}[H]
+\centering
+\caption{Decision Tree - Performance Summary}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{Training (80\%)} & \textbf{Validation (20\%)} \\
+\midrule
+Accuracy & 90.56\% & 86.51\% \\
+Precision (macro avg) & 0.90 & 0.85 \\
+Recall (macro avg) & 0.90 & 0.85 \\
+F1-Score (macro avg) & 0.90 & 0.85 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations:}
+\begin{itemize}
+    \item Shows moderate overfitting (90.56\% train vs 86.51\% validation)
+    \item Excellent performance on Obesity Type III (99\% precision/recall)
+    \item Struggles with Overweight Level I and II (72-77\% precision)
+    \item Fast training and prediction time
+\end{itemize}
+
+\subsubsection{Random Forest Performance}
+
+\begin{table}[H]
+\centering
+\caption{Random Forest - Performance Summary}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{Training (80\%)} & \textbf{Validation (20\%)} \\
+\midrule
+Accuracy & 92.61\% & 89.83\% \\
+Best CV Score & \multicolumn{2}{c}{89.40\%} \\
+Test Accuracy (Best HP) & \multicolumn{2}{c}{89.80\%} \\
+\midrule
+Precision (macro avg) & 0.92 & 0.89 \\
+Recall (macro avg) & 0.92 & 0.89 \\
+F1-Score (macro avg) & 0.92 & 0.89 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations:}
+\begin{itemize}
+    \item Significant improvement over Decision Tree (+3.32\% validation accuracy)
+    \item Better generalization (smaller train-val gap)
+    \item Feature engineering (BMI, Age Groups) contributed substantially
+    \item BMI alone accounts for 34.52\% of prediction importance
+\end{itemize}
+
+\subsubsection{XGBoost Performance}
+
+\begin{table}[H]
+\centering
+\caption{XGBoost - 5-Fold Cross-Validation Results}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Mean CV Accuracy & \textbf{91.77\% $\pm$ 0.24\%} \\
+Best Trial CV Score & 91.77\% \\
+\midrule
+\multicolumn{2}{l}{\textbf{Individual Fold Scores}} \\
+\midrule
+Fold 1 & 91.37\% \\
+Fold 2 & 91.88\% \\
+Fold 3 & 91.66\% \\
+Fold 4 & 92.05\% \\
+Fold 5 & 91.88\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations:}
+\begin{itemize}
+    \item Excellent consistency across folds (std = 0.24\%)
+    \item Combining training + original data improved robustness
+    \item Sample weighting effectively handled class imbalance
+    \item Optuna found optimal hyperparameters after 218 trials
+    \item Lower standard deviation indicates stable model
+\end{itemize}
+
+\subsection{Comparative Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Model Comparison - Validation Performance}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+Decision Tree & 86.51\% & 0.85 & 0.85 & 0.85 \\
+Random Forest & 89.83\% & 0.89 & 0.89 & 0.89 \\
+XGBoost & \textbf{91.77\%} & \textbf{---} & \textbf{---} & \textbf{---} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Class-wise Performance Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Random Forest - Per-Class Metrics (Validation Set)}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+Insufficient Weight & 0.93 & 0.94 & 0.93 \\
+Normal Weight & 0.87 & 0.90 & 0.88 \\
+Overweight Level I & 0.80 & 0.71 & 0.75 \\
+Overweight Level II & 0.79 & 0.83 & 0.81 \\
+Obesity Type I & 0.88 & 0.85 & 0.87 \\
+Obesity Type II & 0.95 & 0.97 & 0.96 \\
+Obesity Type III & 0.99 & 1.00 & 0.99 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Insights:}
+\begin{itemize}
+    \item Extreme categories (Insufficient Weight, Obesity Type III) are easier to classify
+    \item Middle categories (Overweight Level I \& II) are more challenging due to overlapping features
+    \item Obesity Type III shows near-perfect classification (0.99 F1-score)
+\end{itemize}
+
+\subsection{Test Set Evaluation and Kaggle Performance}
+
+\subsubsection{Kaggle Competition Results}
+
+After rigorous local validation, we submitted predictions from all three models to the Kaggle competition platform. The test set consists of 5,225 unseen samples with the same feature distribution as the training data.
+
+\begin{table}[H]
+\centering
+\caption{Kaggle Leaderboard Performance - Test Set Results}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Local CV Score} & \textbf{Kaggle Test Score} & \textbf{Generalization Gap} \\
+\midrule
+Decision Tree & 86.51\% & 86.23\% & -0.28\% \\
+Random Forest & 89.83\% & 89.41\% & -0.42\% \\
+XGBoost & \textbf{91.77\%} & \textbf{91.60\%} & \textbf{-0.17\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Local Cross-Validation vs Test Set Analysis}
+
+The comparison between local validation and Kaggle test performance reveals important insights about model generalization:
+
+\textbf{Observations:}
+\begin{itemize}
+    \item \textbf{XGBoost shows superior generalization:} With only a 0.17\% drop from local CV to test set, XGBoost demonstrates the best ability to generalize to unseen data
+    \item \textbf{Random Forest experiences moderate degradation:} The 0.42\% gap suggests slight overfitting despite ensemble averaging
+    \item \textbf{Decision Tree maintains consistency:} The 0.28\% gap indicates the limited capacity prevented severe overfitting
+    \item \textbf{All models generalize well:} Generalization gaps under 0.5\% across all models indicate robust preprocessing and validation strategies
+\end{itemize}
+
+\subsubsection{Factors Contributing to Generalization Gap}
+
+\begin{enumerate}
+    \item \textbf{Synthetic Data Distribution Shift:}
+    \begin{itemize}
+        \item The test set was generated using the same deep learning model as training data but with different random seeds
+        \item Minor distributional differences are expected in synthetic data generation
+        \item The small gap validates that our preprocessing pipeline is robust to these variations
+    \end{itemize}
+    
+    \item \textbf{Cross-Validation Strategy:}
+    \begin{itemize}
+        \item 5-fold stratified CV provides optimistic estimates by using 80\% of data for training in each fold
+        \item The single held-out test set may have slightly different characteristics
+        \item The narrow gap confirms our CV strategy was appropriate
+    \end{itemize}
+    
+    \item \textbf{Regularization Effectiveness:}
+    \begin{itemize}
+        \item XGBoost's L1/L2 regularization (alpha=0.014541, lambda=1.30014) effectively prevents overfitting
+        \item The smallest generalization gap for XGBoost validates the hyperparameter optimization process
+        \item Optuna successfully found parameters that maximize both training performance and generalization
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Model Stability Across Data Splits}
+
+To further validate generalization, we analyzed performance consistency:
+
+\begin{table}[H]
+\centering
+\caption{XGBoost Performance Stability Analysis}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Mean 5-Fold CV Accuracy & 91.77\% \\
+Standard Deviation (CV Folds) & 0.24\% \\
+Minimum Fold Accuracy & 91.37\% \\
+Maximum Fold Accuracy & 92.05\% \\
+Kaggle Test Set Accuracy & 91.60\% \\
+\midrule
+\textbf{Stability Assessment} & \textbf{Excellent} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Stability Insights:}
+\begin{itemize}
+    \item The extremely low standard deviation (0.24\%) across folds indicates highly consistent performance
+    \item The test set score falls well within the range of CV fold scores [91.37\%, 92.05\%]
+    \item This consistency validates that the model has learned generalizable patterns rather than memorizing training-specific artifacts
+\end{itemize}
+
+\subsubsection{Competition Performance Summary}
+
+\textbf{Final Kaggle Submission Details:}
+\begin{itemize}
+    \item \textbf{Best Model:} XGBoost with Optuna-optimized hyperparameters
+    \item \textbf{Final Test Score:} 91.60\% (0.91597 on leaderboard)
+    \item \textbf{Total Submissions:} 3 models (Decision Tree, Random Forest, XGBoost)
+    \item \textbf{Best Performing Configuration:}
+    \begin{itemize}
+        \item 900 estimators with learning rate 0.024043
+        \item Max depth 10 with min\_child\_weight 3
+        \item Subsample 0.7, colsample\_bytree 0.4
+        \item L1 regularization (alpha) = 0.014541
+        \item L2 regularization (lambda) = 1.30014
+    \end{itemize}
+\end{itemize}
+
+\textbf{Key Achievement:} The close alignment between local CV (91.77\%) and Kaggle test (91.60\%) scores demonstrates that our rigorous development process—including proper preprocessing, stratified cross-validation, and Bayesian hyperparameter optimization—successfully produced a model that generalizes effectively to unseen data.
+
+\subsection{Confusion Matrix Analysis}
+
+The confusion matrices reveal:
+\begin{itemize}
+    \item Most misclassifications occur between adjacent weight categories
+    \item Overweight Level I is often confused with Normal Weight and Overweight Level II
+    \item Obesity categories are rarely misclassified to lower weight categories
+    \item This pattern aligns with the ordinal nature of the target variable
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{fig_confusion_matrix.png}
+    \caption{Normalized Confusion Matrix for the Final XGBoost Model. The high values on the diagonal and the concentration of errors in adjacent classes (off-diagonal) are typical for an ordinal classification problem, demonstrating the model's primary confusion occurs between neighboring weight categories.}
+    \label{fig:xgb_cm}
+\end{figure}
+
+
+
+\subsection{Model Selection Rationale}
+
+\begin{enumerate}
+    \item \textbf{Decision Tree:} Baseline model, interpretable but prone to overfitting
+    \item \textbf{Random Forest:} Significant improvement through ensemble averaging and feature engineering
+    \item \textbf{XGBoost:} Best performance via sequential error correction, regularization, and advanced hyperparameter tuning
+\end{enumerate}
+
+\newpage
+
+% ============================================
+% 6. HYPERPARAMETER TUNING
+% ============================================
+\section{Hyperparameter Tuning}
+
+\subsection{Random Forest - RandomizedSearchCV}
+
+\subsubsection{Methodology}
+\begin{itemize}
+    \item \textbf{Search Strategy:} RandomizedSearchCV
+    \item \textbf{Cross-Validation:} 3-fold StratifiedKFold
+    \item \textbf{Iterations:} 15 random configurations
+    \item \textbf{Scoring Metric:} Accuracy
+    \item \textbf{Parallel Jobs:} -1 (all CPU cores)
+\end{itemize}
+
+\subsubsection{Results}
+\begin{itemize}
+    \item \textbf{Best CV Score:} 89.40\%
+    \item \textbf{Test Accuracy:} 89.80\%
+    \item Search completed in approximately 45 minutes
+\end{itemize}
+
+\subsection{XGBoost - Optuna Optimization}
+
+\subsubsection{Methodology}
+Optuna uses Tree-structured Parzen Estimator (TPE) for Bayesian optimization:
+
+\begin{algorithm}[H]
+\caption{Optuna Hyperparameter Optimization}
+\begin{algorithmic}[1]
+\State Initialize study with TPE sampler
+\For{trial = 1 to max\_trials}
+    \State Suggest hyperparameters using TPE
+    \State Initialize XGBoost model with suggested parameters
+    \For{fold in 5-fold CV}
+        \State Compute sample weights for current fold
+        \State Train model on training fold
+        \State Evaluate on validation fold
+    \EndFor
+    \State $score \gets$ mean accuracy across 5 folds
+    \State Update TPE with trial result
+    \If{score $>$ best\_score}
+        \State Update best\_score and best\_params
+    \EndIf
+\EndFor
+\State \Return best\_params, best\_score
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Optimization Progress}
+\begin{itemize}
+    \item \textbf{Total Trials:} 218 (out of 300 maximum)
+    \item \textbf{Best Trial:} \#104
+    \item \textbf{Best CV Score:} 91.77\%
+    \item \textbf{Runtime:} Approximately 5 hours (reached timeout)
+    \item \textbf{Improvement:} Steady convergence observed after trial 50
+\end{itemize}
+
+\subsubsection{Key Parameter Insights}
+\begin{enumerate}
+    \item \textbf{Learning Rate (0.024):} Lower value prevents overfitting
+    \item \textbf{Max Depth (10):} Captures complex patterns without excessive memorization
+    \item \textbf{Subsample (0.7):} Introduces randomness, improves generalization
+    \item \textbf{Regularization:}
+    \begin{itemize}
+        \item reg\_alpha = 0.0145 (L1 regularization)
+        \item reg\_lambda = 1.30 (L2 regularization)
+    \end{itemize}
+    \item \textbf{Tree-specific:}
+    \begin{itemize}
+        \item gamma = 0.7 (minimum loss reduction for split)
+        \item min\_child\_weight = 3 (prevents overly specific leaves)
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Comparison of Tuning Approaches}
+
+\begin{table}[H]
+\centering
+\caption{Hyperparameter Tuning Method Comparison}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Aspect} & \textbf{RandomizedSearchCV} & \textbf{Optuna} \\
+\midrule
+Search Strategy & Random Sampling & Bayesian (TPE) \\
+Trials & 15 & 218 \\
+Best Score & 89.40\% & 91.77\% \\
+Runtime & Approximately 45 min & Approximately 5 hours \\
+CV Folds & 3 & 5 \\
+Efficiency & Lower & Higher \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Conclusion:} Optuna's intelligent search strategy explored the parameter space more effectively, finding better configurations despite longer runtime. The Bayesian approach learns from previous trials, making it superior for complex models like XGBoost.
+
+\newpage
+
+% ============================================
+% 7. CHALLENGES AND SOLUTIONS
+% ============================================
+\section{Challenges and Solutions}
+
+\subsection{Class Imbalance}
+\textbf{Challenge:} Obesity Type III (19.20\%) vs Overweight Level I (11.87\%)
+
+\textbf{Solutions:}
+\begin{itemize}
+    \item Stratified sampling in train-validation split
+    \item Sample weights in XGBoost (computed using \texttt{compute\_class\_weight})
+    \item Multi-class specific metrics (per-class precision, recall, F1)
+\end{itemize}
+
+\subsection{Overlapping Weight Categories}
+\textbf{Challenge:} Adjacent categories (e.g., Overweight Level I vs II) share similar feature distributions
+
+\textbf{Solutions:}
+\begin{itemize}
+    \item Feature engineering: BMI captures non-linear weight-height relationship
+    \item Age binning: Creates discrete groups with better separability
+    \item Ensemble methods: Multiple trees capture subtle patterns
+\end{itemize}
+
+\subsection{Model Overfitting}
+\textbf{Challenge:} Decision Tree showed 4\% train-validation gap
+
+\textbf{Solutions:}
+\begin{itemize}
+    \item Limited max\_depth to 9 for Decision Tree
+    \item Random Forest: Bootstrap sampling and feature randomness
+    \item XGBoost: L1/L2 regularization, early stopping criterion
+    \item Cross-validation for robust evaluation
+\end{itemize}
+
+\subsection{Computational Constraints}
+\textbf{Challenge:} XGBoost hyperparameter optimization computationally expensive
+
+\textbf{Solutions:}
+\begin{itemize}
+    \item Used n\_jobs=-1 for parallel processing
+    \item Set timeout (5 hours) instead of fixed trial count
+    \item Optuna's TPE sampler converges faster than grid/random search
+    \item Efficient 5-fold CV instead of 10-fold
+\end{itemize}
+
+\subsection{Feature Scaling Consistency}
+\textbf{Challenge:} Train-test leakage through scaling
+
+\textbf{Solutions:}
+\begin{itemize}
+    \item Fit scaler only on training data
+    \item Transform validation and test using training statistics
+    \item Ensured consistent preprocessing pipeline
+\end{itemize}
+
+\newpage
+
+% ============================================
+% 8. CONCLUSION
+% ============================================
+\section{Conclusion}
+
+\subsection{Summary of Achievements}
+
+This project successfully developed and compared three machine learning models for obesity and CVD risk classification:
+
+\begin{enumerate}
+    \item \textbf{Decision Tree:} Achieved 86.51\% validation accuracy, serving as an interpretable baseline
+    \item \textbf{Random Forest:} Improved to 89.83\% through ensemble learning and feature engineering
+    \item \textbf{XGBoost:} Reached 91.77\% local CV accuracy and \textbf{0.91597 Kaggle leaderboard score} through advanced gradient boosting and Optuna optimization
+\end{enumerate}
+
+\subsection{Key Learnings}
+
+\begin{itemize}
+    \item \textbf{Feature Engineering:} BMI and age binning significantly improved model performance
+    \item \textbf{Ensemble Methods:} Random Forest and XGBoost substantially outperformed single Decision Tree
+    \item \textbf{Hyperparameter Tuning:} Optuna's Bayesian optimization found better parameters than random search
+    \item \textbf{Data Augmentation:} Combining synthetic and original datasets improved XGBoost robustness
+    \item \textbf{Class Imbalance:} Sample weighting effectively handled uneven class distribution
+\end{itemize}
+
+\subsection{Model Recommendation}
+
+\textbf{XGBoost} is recommended as the final model because:
+\begin{itemize}
+    \item Highest cross-validation accuracy (91.77\%)
+    \item Excellent stability (std = 0.24\% across folds)
+    \item Robust to overfitting through regularization
+    \item Handles class imbalance effectively
+    \item Production-ready with efficient prediction
+\end{itemize}
+\newpage
+\subsection{Future Work}
+
+Our model achieved strong results, but there are clear paths for further improvement and research. Future work will focus on these key areas:
+
+\subsubsection{Model and Ensemble Optimization}
+\begin{itemize}
+    \item Implement a \textbf{stacking ensemble} combining Decision Tree, Random Forest, and XGBoost models to leverage the unique strengths of each base learner
+    \item Explore alternative \textbf{gradient boosting frameworks} such as CatBoost and LightGBM, which may offer computational efficiencies and slightly better regularization methods
+    \item Investigate \textbf{ordinal classification methods} that are specifically designed to respect the inherent order of the weight categories (e.g., Overweight $\rightarrow$ Obesity), potentially reducing misclassifications between adjacent classes
+    \item Research and test preliminary \textbf{deep learning approaches (Neural Networks)} to see if they can capture more complex non-linear feature interactions than tree-based methods
+\end{itemize}
+
+\subsubsection{Feature and Data Strategy Expansion}
+\begin{itemize}
+    \item Further develop the current features by creating key \textbf{interaction features} (e.g., the combined effect of physical activity and high caloric food consumption, $\text{FAF} \times \text{FAVC}$)
+    \item Explore the creation of new \textbf{domain-specific features or ratios} (such as water intake scaled by body weight) to better capture physiological factors
+    \item Investigate methods for building \textbf{robustness into predictions} (similar to test-time augmentation) to improve generalization on unseen test data distributions
+\end{itemize}
+
+\subsection{Competition Performance}
+
+\begin{itemize}
+    \item Total Kaggle submissions: Within 15/day limit
+    \item Models submitted: Decision Tree, Random Forest, XGBoost
+    \item Best Kaggle leaderboard score: \textbf{0.91597}
+    \item Best local CV score: 0.91771 (XGBoost 5-fold)
+    \item Reproducibility: All code uses random\_state=42
+\end{itemize}
+
+\textbf{Note:} The slight difference between local CV (0.91771) and Kaggle leaderboard (0.91597) is expected due to different test set distributions and the stochastic nature of the competition's synthetic data generation process.
+
+\newpage
+
+% ============================================
+% 9. REPRODUCIBILITY
+% ============================================
+\section{Reproducibility}
+
+\subsection{Environment Setup}
+
+\subsubsection{Python Version}
+Python 3.8+
+
+\subsubsection{Required Libraries}
+\begin{lstlisting}[language=bash]
+pandas==1.3.0
+numpy==1.21.0
+scikit-learn==1.0.0
+xgboost==1.5.0
+optuna==3.0.0
+matplotlib==3.4.0
+seaborn==0.11.0
+\end{lstlisting}
+
+\subsection{Random Seeds}
+All models use \textbf{random\_state=42} for reproducibility:
+\begin{itemize}
+    \item Train-test split: random\_state=42
+    \item Decision Tree: random\_state=42
+    \item Random Forest: random\_state=42
+    \item XGBoost: seed=42
+    \item Optuna: sampler seed=42
+\end{itemize}
+
+\subsection{Code Availability}
+
+\textbf{GitHub Repository:} \url{https://github.com/vivekvj18/ML_PROJECT}
+
+Repository structure:
+\begin{verbatim}
+├── data/
+│   ├── train.csv
+│   └── test.csv
+├── notebooks/
+│   ├── 01_EDA.ipynb
+│   ├── 02_DecisionTree.ipynb
+│   ├── 03_RandomForest.ipynb
+│   └── 04_XGBoost.ipynb
+├── models/
+│   ├── decision_tree.pkl
+│   ├── random_forest.pkl
+│   └── xgboost_model.pkl
+├── submissions/
+│   ├── submission_dt.csv
+│   ├── submission_rf.csv
+│   └── submission_xgb.csv
+└── README.md
+\end{verbatim}
+
+\subsection{Execution Instructions}
+
+\begin{enumerate}
+    \item Clone repository
+    \item Install dependencies: \texttt{pip install -r requirements.txt}
+    \item Run notebooks in order (01 through 04)
+    \item Models will be saved automatically
+    \item Submission files generated in submissions/ folder
+\end{enumerate}
+
+\newpage
+
+% ============================================
+% 10. REFERENCES
+% ============================================
+\section{References}
+
+\begin{enumerate}
+    \item Chen, T., \& Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. \textit{Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, 785-794.
+    
+    \item Breiman, L. (2001). Random Forests. \textit{Machine Learning}, 45(1), 5-32.
+    
+    \item Akiba, T., Sano, S., Yanase, T., Ohta, T., \& Koyama, M. (2019). Optuna: A Next-generation Hyperparameter Optimization Framework. \textit{Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery \& Data Mining}, 2623-2631.
+    
+    \item Pedregosa, F., et al. (2011). Scikit-learn: Machine Learning in Python. \textit{Journal of Machine Learning Research}, 12, 2825-2830.
+    
+    \item Original Dataset: Obesity or CVD risk dataset. Kaggle. \url{https://www.kaggle.com/datasets/aravindpcoder/obesity-or-cvd-risk-classifyregressorcluster}
+    
+    \item Competition: AIT-511 Course Project 1 - Obesity Risk. Kaggle. \url{https://www.kaggle.com/competitions/ait-511-course-project-1-obesity-risk}
+\end{enumerate}
+
+\newpage
+
+% ============================================
+% APPENDIX
+% ============================================
+\appendix
+
+\section{Code Snippets}
+
+\subsection{Data Loading and EDA}
+
+\begin{lstlisting}[language=Python, caption=Loading Dataset]
+import pandas as pd
+import numpy as np
+
+# Load datasets
+train_df = pd.read_csv("train.csv")
+test_df = pd.read_csv("test.csv")
+
+# Basic info
+print("Train shape:", train_df.shape)
+print("Test shape:", test_df.shape)
+print("\nMissing values:")
+print(train_df.isnull().sum())
+
+# Target distribution
+print("\nTarget distribution:")
+print(train_df['WeightCategory'].value_counts(normalize=True)*100)
+\end{lstlisting}
+
+\subsection{Preprocessing Pipeline}
+
+\begin{lstlisting}[language=Python, caption=Outlier Capping]
+# IQR-based outlier capping
+numeric_cols = ['Age', 'Height', 'Weight', 'FCVC',
+                'NCP', 'CH2O', 'FAF', 'TUE']
+
+for col in numeric_cols:
+    Q1 = train_df[col].quantile(0.25)
+    Q3 = train_df[col].quantile(0.75)
+    IQR = Q3 - Q1
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+    
+    train_df[col] = np.where(train_df[col] < lower,
+                             lower, train_df[col])
+    train_df[col] = np.where(train_df[col] > upper,
+                             upper, train_df[col])
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language=Python, caption=Feature Engineering for Random Forest]
+# Create BMI feature
+train_df['BMI'] = train_df['Weight'] / (train_df['Height']**2)
+test_df['BMI'] = test_df['Weight'] / (test_df['Height']**2)
+
+# Age grouping
+train_df['AgeGroup'] = pd.cut(
+    train_df['Age'],
+    bins=[0, 18, 30, 45, 60, 100],
+    labels=['Teen', 'Young', 'Adult', 'MidAge', 'Senior']
+)
+\end{lstlisting}
+
+\subsection{Model Training - XGBoost with Optuna}
+
+\begin{lstlisting}[language=Python, caption=XGBoost Optuna Optimization]
+import optuna
+from xgboost import XGBClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score
+
+def objective(trial):
+    params = {
+        'n_estimators': trial.suggest_int('n_estimators',
+                                         500, 2000, step=100),
+        'learning_rate': trial.suggest_float('learning_rate',
+                                            0.01, 0.05, log=True),
+        'max_depth': trial.suggest_int('max_depth', 5, 12),
+        'min_child_weight': trial.suggest_int('min_child_weight',
+                                             1, 7),
+        'subsample': trial.suggest_float('subsample',
+                                        0.5, 0.9, step=0.05),
+        'colsample_bytree': trial.suggest_float('colsample_bytree',
+                                              0.4, 0.9, step=0.05),
+        'gamma': trial.suggest_float('gamma',
+                                    0.0, 3.0, step=0.1),
+        'reg_alpha': trial.suggest_float('reg_alpha',
+                                        0.01, 5.0, log=True),
+        'reg_lambda': trial.suggest_float('reg_lambda',
+                                         0.01, 5.0, log=True),
+    }
+    
+    cv = StratifiedKFold(n_splits=5, shuffle=True,
+                        random_state=42)
+    scores = []
+    
+    for train_idx, val_idx in cv.split(X, y):
+        X_train_fold = X.iloc[train_idx]
+        y_train_fold = y[train_idx]
+        X_val_fold = X.iloc[val_idx]
+        y_val_fold = y[val_idx]
+        
+        model = XGBClassifier(**params, random_state=42)
+        model.fit(X_train_fold, y_train_fold)
+        
+        preds = model.predict(X_val_fold)
+        acc = accuracy_score(y_val_fold, preds)
+        scores.append(acc)
+    
+    return np.mean(scores)
+
+# Run optimization
+study = optuna.create_study(direction='maximize',
+                           sampler=optuna.samplers.TPESampler(seed=42))
+study.optimize(objective, n_trials=300, timeout=18000)
+
+print("Best CV Score:", study.best_value)
+print("Best Parameters:", study.best_params)
+\end{lstlisting}
+
+\subsection{Model Evaluation}
+
+\begin{lstlisting}[language=Python, caption=Comprehensive Model Evaluation]
+from sklearn.metrics import (accuracy_score, classification_report,
+                            confusion_matrix)
+
+# Predictions
+y_val_pred = model.predict(X_val)
+
+# Accuracy
+val_acc = accuracy_score(y_val, y_val_pred)
+print(f"Validation Accuracy: {val_acc:.4f}")
+
+# Detailed metrics
+print("\nClassification Report:")
+print(classification_report(y_val, y_val_pred))
+
+# Confusion matrix
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_val, y_val_pred))
+\end{lstlisting}
+
+\newpage
+
+% ============================================
+% 11. ADDITIONAL TABLES
+% ============================================
+\section{Additional Tables}
+
+\subsection{Complete Feature List}
+
+\begin{table}[H]
+\centering
+\caption{Complete Feature Description}
+\begin{tabular}{lll}
+\toprule
+\textbf{Feature} & \textbf{Type} & \textbf{Description} \\
+\midrule
+Age & Numerical & Age in years \\
+Height & Numerical & Height in meters \\
+Weight & Numerical & Weight in kilograms \\
+FCVC & Numerical & Frequency of vegetable consumption \\
+NCP & Numerical & Number of main meals \\
+CH2O & Numerical & Daily water consumption \\
+FAF & Numerical & Physical activity frequency \\
+TUE & Numerical & Time using technology devices \\
+Gender & Categorical & Male or Female \\
+family\_history & Categorical & Family history with overweight \\
+FAVC & Categorical & Frequent high caloric food consumption \\
+CAEC & Categorical & Consumption of food between meals \\
+SMOKE & Categorical & Smoking habit \\
+SCC & Categorical & Calories consumption monitoring \\
+CALC & Categorical & Alcohol consumption frequency \\
+MTRANS & Categorical & Transportation method used \\
+\midrule
+BMI & Engineered & Body Mass Index (Weight/Height$^2$) \\
+AgeGroup & Engineered & Age binned into categories \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Training Time Comparison}
+
+\begin{table}[H]
+\centering
+\caption{Model Training Time}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{Training Time} & \textbf{Prediction Time} & \textbf{Total Time} \\
+\midrule
+Decision Tree & Approximately 2 sec & $<$1 second & Approximately 2 sec \\
+Random Forest & Approximately 45 min & Approximately 1 sec & Approximately 45 min \\
+XGBoost (Optuna) & Approximately 5 hours & Approximately 1 sec & Approximately 5 hours \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Visualization Insights}
+Key visualizations performed:
+\begin{itemize}
+    \item \textbf{Model Performance:} Comprehensive comparison plots showcasing Accuracy, Precision, Recall, F1-Score (see Figures \ref{fig:overall_accuracy} and \ref{fig:comprehensive_metrics})
+    \item \textbf{Model Interpretability:} Feature Importance ranking for the Random Forest model (see Figure \ref{fig:rf_feature_imp})
+    \item \textbf{Error Analysis:} Normalized Confusion Matrix for the final XGBoost classifier (see Figure \ref{fig:xgb_cm})
+\end{itemize}
+
+\subsubsection{Additional EDA Visualizations}
+The following detailed visualizations were created during Exploratory Data Analysis (EDA) and are available in the GitHub repository for deeper insight:
+\begin{enumerate}
+    \item Correlation Heatmap: Shows relationships between numerical features
+    \item Target Distribution: Bar plot of 7 weight categories
+    \item Box Plots: Distribution of numerical features across target classes
+    \item Count Plots: Frequency of categorical feature values
+    \item Pair Plots: Pairwise relationships colored by target
+\end{enumerate}
+
+\newpage
+
+% ============================================
+% 12. ACKNOWLEDGMENTS
+% ============================================
+\section*{Acknowledgments}
+\addcontentsline{toc}{section}{Acknowledgments}
+
+We would like to express our sincere gratitude to:
+
+\begin{itemize}
+    \item \textbf{Dr. Aswin Kannan}, Assistant Professor at IIIT Bangalore, for his invaluable guidance, insightful feedback, and continuous support throughout this project
+    \item \textbf{International Institute of Information Technology, Bangalore (IIITB)} for providing the resources and academic environment that made this research possible
+    \item The \textbf{Kaggle community} for hosting the competition and providing a platform for collaborative learning and model evaluation
+    \item Our \textbf{peers and classmates} in the AIT-511 course for their constructive discussions and collaborative spirit
+    \item The developers of \textbf{open-source libraries} (scikit-learn, XGBoost, Optuna, pandas, matplotlib) whose tools were fundamental to our implementation
+\end{itemize}
+
+\vspace{1cm}
+
+% ============================================
+% 13. CONTACT INFORMATION
+% ============================================
+\section*{Contact Information}
+\addcontentsline{toc}{section}{Contact Information}
+
+For questions, collaboration, or further information about this project:
+
+\begin{itemize}
+    \item \textbf{Ruturaj Dnyandeo Wairkar}
+    \begin{itemize}
+        \item Roll Number: MT2025108
+        \item Email: \href{mailto:ruturaj.wairkar@iiitb.ac.in}{ruturaj.wairkar@iiitb.ac.in}
+    \end{itemize}
+    
+    \item \textbf{Vivek Joshi}
+    \begin{itemize}
+        \item Roll Number: MT2025133
+        \item Email: \href{mailto:vivek.joshi@iiitb.ac.in}{vivek.joshi@iiitb.ac.in}
+    \end{itemize}
+\end{itemize}
+
+\vspace{1cm}
+
+\begin{center}
+\textbf{Kaggle Team:} MT2025108\_MT2025133
+\end{center}
+
+\end{document}
